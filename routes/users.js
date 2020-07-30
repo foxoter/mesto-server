@@ -6,7 +6,14 @@ const usersPath = path.join(__dirname, '../data/users.json');
 const users = JSON.parse(fs.readFileSync(usersPath, { encoding: 'utf8' }));
 
 router.get('/', (req, res) => {
-  res.send(users);
+  const reader = fs.createReadStream(usersPath, { encoding: 'utf8' });
+  reader.on('error', () => {
+    res.status(500).send({ Error: 'Reading error' });
+  });
+  reader.on('open', () => {
+    res.writeHead(200, { 'Content-type': 'application/json; charset=utf-8' });
+    reader.pipe(res);
+  });
 });
 
 router.get('/:id', ((req, res) => {
