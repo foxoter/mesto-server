@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 
 const usersPath = path.join(__dirname, '../data/users.json');
-// const users = JSON.parse(fs.readFileSync(usersPath, { encoding: 'utf8' }));
 
 router.get('/', (req, res) => {
   const reader = fs.createReadStream(usersPath, { encoding: 'utf8' });
