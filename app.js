@@ -26,8 +26,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
-app.use(express.urlencoded());
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
 app.use('/', (req, res) => {

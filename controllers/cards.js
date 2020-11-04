@@ -47,10 +47,10 @@ module.exports.likeCard = (req, res) => {
   )
     .populate('likes')
     .then(card => {
-      // if (!card) {
-      //   res.status(404).send({ message: 'Card not found' });
-      //   return;
-      // }
+      if (!card) {
+        res.status(404).send({ message: 'Card not found' });
+        return;
+      }
       res.send({ data: card });
     })
     .catch(() => {
