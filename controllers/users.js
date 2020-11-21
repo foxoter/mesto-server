@@ -59,7 +59,7 @@ module.exports.createUser = (req, res) => {
         .catch((err) => {
           if (err.name === 'ValidationError') {
             res.status(400)
-              .send({ message: 'Name validation failed' });
+              .send({ message: `${err.message}` });
             return;
           }
           if (err.code === 11000) {
