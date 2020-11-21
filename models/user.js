@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
     validate: {
       validator: (email) => emailValidator(email),
       message: 'Email validation failed',
@@ -17,7 +18,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false
+    minlength: 8,
+    select: false,
   },
   name: {
     type: String,

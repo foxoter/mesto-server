@@ -42,10 +42,6 @@ module.exports.createUser = (req, res) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
-  if (!name) {
-    res.status(400).send({ message: 'Invalid name' });
-    return;
-  }
   if (!password) {
     res.status(400).send({ message: 'Invalid or empty password' });
     return;
@@ -63,7 +59,11 @@ module.exports.createUser = (req, res) => {
         .catch((err) => {
           if (err.name === 'ValidationError') {
             res.status(400)
-              .send({ message: 'Some data is invalid' });
+              .send({ message: 'Name validation failed' });
+            return;
+          }
+          if (err.code === 11000) {
+            res.status(400).send({ message: 'This email already exists' });
             return;
           }
           res.status(500)
