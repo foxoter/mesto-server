@@ -15,8 +15,7 @@ module.exports.getCards = (req, res) => {
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -33,13 +32,18 @@ module.exports.deleteCard = (req, res) => {
     res.status(400).send({ message: 'Invalid id' });
     return;
   }
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
+    .populate('owner')
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Card not found' });
         return;
       }
-      res.send({ data: card });
+      if (card.owner.id !== req.user._id) {
+        res.status(401).send({ message: 'You do not have the rights to delete this card' });
+        return;
+      }
+      Card.deleteOne(card).then(() => res.send({ data: card }));
     })
     .catch(() => {
       res.status(500).send({ message: 'Internal server error' });
