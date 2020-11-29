@@ -36,7 +36,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('No card is matching that id...')
       }
-      if (card.owner !== req.user._id) {
+      if (card.owner.id !== req.user._id) {
         throw new ForbiddenError('You have no rights to delete this card')
       }
       Card.deleteOne(card).then(() => res.send({ data: card }));
