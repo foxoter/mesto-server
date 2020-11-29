@@ -13,3 +13,9 @@ node_modules
 .DS_Store
 .idea
 .vscode
+
+# Requests and errors logging
+*.log
+
+# Environment
+.env

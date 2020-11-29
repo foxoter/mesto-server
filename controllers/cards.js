@@ -1,56 +1,50 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
+const NotFoundError = require("../errors/notFountError");
+const BadRequestError = require("../errors/badRequestError");
+const ForbiddenError = require('../errors/forbiddenError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
       if (!cards.length) {
-        res.status(404).send({ message: 'Cards base is empty' });
-        return;
+        throw new NotFoundError('There are no cards yet...');
       }
       res.send({ data: cards });
     })
-    .catch(() => res.status(500).send({ message: 'Internal server error' }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send({ data: card }))
+    .then((card) =>
+      res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Some data is invalid' });
-        return;
+        throw new BadRequestError(`${err.message}`)
       }
-      res.status(500).send({ message: 'Internal server error' });
-    });
+    })
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const cardId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(cardId)) {
-    res.status(400).send({ message: 'Invalid id' });
-    return;
-  }
   Card.findById(cardId)
     .populate('owner')
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card not found' });
-        return;
+        throw new NotFoundError('No card is matching that id...')
       }
-      if (card.owner.id !== req.user._id) {
-        res.status(401).send({ message: 'You do not have the rights to delete this card' });
-        return;
+      if (card.owner !== req.user._id) {
+        throw new ForbiddenError('You have no rights to delete this card')
       }
       Card.deleteOne(card).then(() => res.send({ data: card }));
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Internal server error' });
-    });
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
     res.status(400).send({ message: 'Invalid id' });
@@ -63,17 +57,14 @@ module.exports.likeCard = (req, res) => {
     .populate('likes')
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card not found' });
-        return;
+        throw new NotFoundError('There are no cards matching this id...');
       }
       res.send({ data: card });
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Internal server error' });
-    });
+    .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
     res.status(400).send({ message: 'Invalid id' });
@@ -87,12 +78,9 @@ module.exports.dislikeCard = (req, res) => {
     .populate('likes')
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card not found' });
-        return;
+        throw new NotFoundError('There are no cards matching this id...');
       }
       res.send({ data: card });
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Internal server error' });
-    });
+    .catch(next);
 };

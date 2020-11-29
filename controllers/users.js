@@ -2,43 +2,37 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const NotFoundError = require("../errors/notFountError");
+const BadRequestError = require("../errors/badRequestError");
+const NotUniqueError = require("../errors/notUniqueError");
+const AuthError = require("../errors/authError");
 
-module.exports.getUsers = (req, res) => {
+const { NODE_ENV, JWT_SECRET } = process.env;
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       if (!users.length) {
-        res.status(404)
-          .send({ message: 'Userbase is empty' });
-        return;
+        throw new NotFoundError('No users for now');
       }
       res.send({ data: users });
     })
-    .catch(() => res.status(500)
-      .send({ message: 'Internal server error' }));
+    .catch(next);
 };
 
-module.exports.getSingleUser = (req, res) => {
+module.exports.getSingleUser = (req, res, next) => {
   const userId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    res.status(400).send({ message: 'Invalid id' });
-    return;
-  }
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(404)
-          .send({ message: 'User not found' });
-        return;
+        throw new NotFoundError('No users match this id');
       }
       res.send({ data: user });
     })
-    .catch(() => {
-      res.status(500)
-        .send({ message: 'Internal server error' });
-    });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
@@ -58,21 +52,17 @@ module.exports.createUser = (req, res) => {
         .then((user) => res.send({ data: user }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            res.status(400)
-              .send({ message: `${err.message}` });
-            return;
+            throw new BadRequestError(`${err.message}`)
           }
           if (err.code === 11000) {
-            res.status(400).send({ message: 'This email already exists' });
-            return;
+            throw new NotUniqueError('This email already exists');
           }
-          res.status(500)
-            .send({ message: 'Internal server error' });
-        });
+        })
+        .catch(next);
     });
 };
 
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
   if (typeof name !== 'string' || typeof about !== 'string') {
     res.status(400).send({ message: 'Invalid request' });
@@ -91,24 +81,14 @@ module.exports.updateUserProfile = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404)
-          .send({ message: 'User not found' });
-        return;
+        throw new NotFoundError('User not found...');
       }
       res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400)
-          .send({ message: 'Some data is invalid' });
-        return;
-      }
-      res.status(500)
-        .send({ message: 'Internal server error' });
-    });
+    .catch(next);
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -120,28 +100,23 @@ module.exports.updateUserAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404)
-          .send({ message: 'User not found' });
-        return;
+        throw new NotFoundError('User not found...')
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400)
-          .send({ message: 'Some data is invalid' });
-        return;
+        throw new BadRequestError(`${err.message}`);
       }
-      res.status(500)
-        .send({ message: 'Internal server error' });
-    });
+    })
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key');
       res
         .cookie('jwt', token, {
           maxAge: 3600000 * 24 * 7,
@@ -151,11 +126,8 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'Error') {
-        res
-          .status(401)
-          .send({ message: err.message });
-        return;
+        throw new AuthError(`${err.message}`);
       }
-      res.status(500).send({ message: 'Internal server error' });
-    });
+    })
+    .catch(next);
 };
