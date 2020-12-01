@@ -18,3 +18,7 @@ Server responds to the following requests: `/`, `/users`, `/cards`.
 * `npm i` to set the dependencies
 * `npm run dev` for Dev version with hot reload via Nodemon
 * `npm run start` for basic version
+
+### Public domain names
+* Frontend: [https://foxoter.students.nomoreparties.space/](http://foxoter.students.nomoreparties.space/)
+* Backend: [https://foxoter.mestoserver.students.nomoreparties.space/](http://foxoter.mestoserver.students.nomoreparties.space/)
