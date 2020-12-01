@@ -1,11 +1,10 @@
-const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const NotFoundError = require("../errors/notFountError");
-const BadRequestError = require("../errors/badRequestError");
-const NotUniqueError = require("../errors/notUniqueError");
-const AuthError = require("../errors/authError");
+const NotFoundError = require('../errors/notFountError');
+const BadRequestError = require('../errors/badRequestError');
+const NotUniqueError = require('../errors/notUniqueError');
+const AuthError = require('../errors/authError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -52,7 +51,7 @@ module.exports.createUser = (req, res, next) => {
         .then((user) => res.send({ data: user }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            throw new BadRequestError(`${err.message}`)
+            throw new BadRequestError(`${err.message}`);
           }
           if (err.code === 11000) {
             throw new NotUniqueError('This email already exists');
@@ -100,7 +99,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('User not found...')
+        throw new NotFoundError('User not found...');
       }
       res.send({ data: user });
     })
@@ -122,7 +121,7 @@ module.exports.login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
         })
-        .end('Authorization success');
+        .send({message: 'Authorization success'});
     })
     .catch((err) => {
       if (err.name === 'Error') {

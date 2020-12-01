@@ -1,4 +1,6 @@
-const { celebrate, Joi, errors, Segments } = require('celebrate');
+const {
+  celebrate, Joi,
+} = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
 const validator = require('validator');
 const BadRequestError = require('../errors/badRequestError');
@@ -17,11 +19,11 @@ const about = Joi.string()
   .required();
 
 const avatar = Joi.string()
-  .required().custom((value, helpers) => urlValidator(value) ? value : helpers.error('any.invalid'));
+  .required().custom((value, helpers) => (urlValidator(value) ? value : helpers.error('any.invalid')));
 
 const email = Joi.string()
   .required()
-  .custom((value, helpers) => emailValidator(value) ? value : helpers.error('any.invalid'));
+  .custom((value, helpers) => (emailValidator(value) ? value : helpers.error('any.invalid')));
 
 const password = Joi.string()
   .required()
@@ -32,31 +34,31 @@ const id = Joi.objectId();
 
 module.exports.userIdValidator = celebrate({
   params: Joi.object().keys({
-    id
-  })
+    id,
+  }),
 });
 
 module.exports.createUserValidator = celebrate({
   body: Joi.object().keys({
-    email, password, name, about, avatar
-  })
+    email, password, name, about, avatar,
+  }),
 });
 
 module.exports.updateProfileValidator = celebrate({
   body: Joi.object().keys({
-    name, about
-  })
+    name, about,
+  }),
 });
 
 module.exports.updateAvatarValidator = celebrate({
   body: Joi.object().keys({
-    avatar
-  })
+    avatar,
+  }),
 });
 
 module.exports.signinValidation = celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
+    email,
     password: Joi.string().required().min(8),
-  })
+  }),
 });

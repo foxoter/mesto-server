@@ -43,7 +43,6 @@ app.use(auth);
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
 
-
 app.use('/', () => {
   throw new NotFoundError('Resource is not found');
 });
@@ -54,15 +53,14 @@ app.use(errors());
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
-  console.log(err);
   res
     .status(statusCode)
     .send({
-        message: statusCode === 500
+      message: statusCode === 500
         ? 'Internal server error'
-        : message
+        : message,
     });
   next();
-})
+});
 
 app.listen(PORT);

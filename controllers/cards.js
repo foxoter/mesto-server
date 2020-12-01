@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
-const NotFoundError = require("../errors/notFountError");
-const BadRequestError = require("../errors/badRequestError");
+const NotFoundError = require('../errors/notFountError');
+const BadRequestError = require('../errors/badRequestError');
 const ForbiddenError = require('../errors/forbiddenError');
 
 module.exports.getCards = (req, res, next) => {
@@ -18,11 +18,10 @@ module.exports.getCards = (req, res, next) => {
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) =>
-      res.send({ data: card }))
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError(`${err.message}`)
+        throw new BadRequestError(`${err.message}`);
       }
     })
     .catch(next);
@@ -34,10 +33,10 @@ module.exports.deleteCard = (req, res, next) => {
     .populate('owner')
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('No card is matching that id...')
+        throw new NotFoundError('No card is matching that id...');
       }
       if (card.owner.id !== req.user._id) {
-        throw new ForbiddenError('You have no rights to delete this card')
+        throw new ForbiddenError('You have no rights to delete this card');
       }
       Card.deleteOne(card).then(() => res.send({ data: card }));
     })
