@@ -1,16 +1,18 @@
 # Express Server
 ###### v 0.0.1
-Building server for Instagram prototype using Express - Node.js web application framework.
+Building a server for Instagram prototype using Express - Node.js web application framework.
 
 ### Technologies & Features
-* HTML
-* CSS
-* JS
-* Node.js
-* Express
-* Eslint
+* Frontend: HTML, CSS, JS
+* Backend: Node.js, Express, Mongo, Mongoose, JWT, Nginx, pm2, Let`s Encrypt, Celebrate, Winston
+* Other: Webpack, Eslint
 
-Server responds to the following requests: `/`, `/users`, `/cards`.
+### Functionality
+Server handles:
+* user creation,
+* user authorisation,
+* adding and deleting cards,
+* putting and removing likes.
 
 ### Installation
 
